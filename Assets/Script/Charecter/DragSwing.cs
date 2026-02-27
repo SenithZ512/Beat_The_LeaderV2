@@ -23,7 +23,7 @@ public class DragSwing : MonoBehaviour
     {
         isDragging = false;
 
-        rb.gravityScale = 2;        // ปล่อย = เปิดแรงโน้มถ่วง
+        rb.gravityScale = 7;        // ปล่อย = เปิดแรงโน้มถ่วง
     }
 
     void Update()
