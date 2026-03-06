@@ -12,14 +12,31 @@ public class LeaderHealth : MonoBehaviour
     public Sprite criticalSprite;
     public Sprite deadSprite;
 
+    public AudioClip hurtSound;
+    private AudioSource audioSource;
+
+    public int rewardMoney = 10;
+    public PlayerMoney playerMoney;
+
     private SpriteRenderer sr;
     private bool isDead = false;
 
     void Start()
     {
         health = maxHealth;
+
         sr = GetComponent<SpriteRenderer>();
-        sr.sprite = normalSprite;
+
+        if (sr != null)
+            sr.sprite = normalSprite;
+
+        audioSource = GetComponent<AudioSource>();
+
+        // ถ้าไม่มี AudioSource ให้สร้างใหม่
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     public void TakeDamage(int damage)
@@ -28,23 +45,26 @@ public class LeaderHealth : MonoBehaviour
 
         health -= damage;
 
+        // เล่นเสียงแบบ OneShot
+        if (audioSource != null && hurtSound != null)
+        {
+            audioSource.PlayOneShot(hurtSound);
+        }
+
         if (health <= 0)
         {
             Die();
         }
         else if (health <= maxHealth * 0.3f)
         {
-            Debug.Log("Leader สาหัส");
             sr.sprite = criticalSprite;
         }
         else if (health <= maxHealth * 0.6f)
         {
-            Debug.Log("Leader เจ็บ");
             sr.sprite = hurtSprite;
         }
         else
         {
-            Debug.Log("Leader ปกติ");
             sr.sprite = normalSprite;
         }
     }
@@ -52,9 +72,13 @@ public class LeaderHealth : MonoBehaviour
     void Die()
     {
         isDead = true;
-        Debug.Log("Leader ตาย");
 
         sr.sprite = deadSprite;
+
+        if (playerMoney != null)
+        {
+            playerMoney.money += rewardMoney;
+        }
 
         Invoke(nameof(Respawn), respawnTime);
     }
@@ -65,7 +89,5 @@ public class LeaderHealth : MonoBehaviour
         isDead = false;
 
         sr.sprite = normalSprite;
-
-        Debug.Log("Leader ฟื้นแล้ว");
     }
 }

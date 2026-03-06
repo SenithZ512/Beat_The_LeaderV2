@@ -188,5 +188,12 @@ public class MoneyManager : MonoBehaviour
             PlayerPrefs.DeleteKey("UPG_" + id);
 
         PlayerPrefs.Save();
+        UpdateUnclaimedUI();
+        // ถ้ามี UpgradeManager ให้รีโหลดระบบ
+        if (FindObjectOfType<UpgradeManager>())
+        {
+            FindObjectOfType<UpgradeManager>().SendMessage("LoadUpgrades", SendMessageOptions.DontRequireReceiver);
+        }
+        Debug.Log("Upgrades Reset Complete");
     }
 }

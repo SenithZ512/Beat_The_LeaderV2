@@ -9,16 +9,16 @@ public class UpgradeManager : MonoBehaviour
     [System.Serializable]
     public class UpgradeDef
     {
-        public string id;              // เช่น GPU_2060 (ห้ามซ้ำ)
-        public int price;              // 7000
-        public float addIncomePerSec;  // +4
-        public float speedMultiplier;  // x1.7
+        public string id;              // ID ของ Upgrade
+        public int price;              // ราคา
+        public float addIncomePerSec;  // เพิ่มเงินต่อวินาที
+        public float speedMultiplier;  // ตัวคูณสปีด
     }
 
     [Header("List of Upgrades")]
     public UpgradeDef[] upgrades;
 
-    [Header("Base Values (ตอนยังไม่อัปเกรด)")]
+    [Header("Base Values")]
     public float baseIncomePerSecond = 1f;
     public float baseSpeedMultiplier = 1f;
 
@@ -29,12 +29,25 @@ public class UpgradeManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
     }
 
-    string Key(string id) => "UPG_" + id;
+    void Start()
+    {
+        // โหลด upgrade ที่เคยซื้อ
+        ApplyPurchasedUpgrades();
+    }
 
-    public bool IsBought(string id) => PlayerPrefs.GetInt(Key(id), 0) == 1;
+    string Key(string id)
+    {
+        return "UPG_" + id;
+    }
+
+    public bool IsBought(string id)
+    {
+        return PlayerPrefs.GetInt(Key(id), 0) == 1;
+    }
 
     public bool TryBuy(string id)
     {
@@ -43,75 +56,99 @@ public class UpgradeManager : MonoBehaviour
 
         if (IsBought(id)) return false;
 
-        // ใช้เงินจากกระเป๋า (currentMoney)
-        if (!MoneyManager.Instance.SpendMoney(def.price)) return false;
+        if (!MoneyManager.Instance.SpendMoney(def.price))
+            return false;
 
-        // เซฟว่าซื้อแล้ว
+        // บันทึกว่าซื้อแล้ว
         PlayerPrefs.SetInt(Key(id), 1);
         PlayerPrefs.Save();
 
-        // Apply ผลของอัปเกรดทันที
+        // ใช้ผล upgrade
         ApplyOne(def);
 
-        // รีเฟรช UI ปุ่ม (Owned/Buy)
+        // รีเฟรช UI
         RefreshAllUpgradeButtons();
+        RefreshAllOwnText();
 
         return true;
     }
 
     public void ApplyPurchasedUpgrades()
     {
-        // เริ่มจากค่า base ก่อน แล้วค่อยบวกคืนจากที่ซื้อ
+        // reset ค่า
         MoneyManager.Instance.incomePerSecond = baseIncomePerSecond;
         MoneyManager.Instance.speedMultiplier = baseSpeedMultiplier;
 
+        // ใส่ effect ของ upgrade ที่ซื้อ
         foreach (var def in upgrades)
         {
             if (IsBought(def.id))
+            {
                 ApplyOne(def);
+            }
         }
 
+        // รีเฟรช UI
         RefreshAllUpgradeButtons();
+        RefreshAllOwnText();
     }
 
     void ApplyOne(UpgradeDef def)
     {
         MoneyManager.Instance.incomePerSecond += def.addIncomePerSec;
-
-        // คูณสปีด (เช่น 1f * 1.7f * 2.2f ...)
         MoneyManager.Instance.speedMultiplier *= Mathf.Max(1f, def.speedMultiplier);
     }
 
     UpgradeDef Get(string id)
     {
         foreach (var u in upgrades)
-            if (u.id == id) return u;
+        {
+            if (u.id == id)
+                return u;
+        }
+
         return null;
     }
 
-    // ✅ รีเซ็ตเฉพาะอัปเกรด (เงินไม่หาย ซื้อใหม่ได้ทันที)
+    // ปุ่ม Reset Upgrade
     public void ResetUpgrades()
     {
         foreach (var def in upgrades)
+        {
             PlayerPrefs.DeleteKey(Key(def.id));
+        }
 
         PlayerPrefs.Save();
 
-        // คืนค่า base ทันที
+        // รีเซ็ตค่า stat
         MoneyManager.Instance.incomePerSecond = baseIncomePerSecond;
         MoneyManager.Instance.speedMultiplier = baseSpeedMultiplier;
 
-        // รีเฟรชปุ่มทั้งหมดให้กลับมากดได้
+        // โหลดสถานะใหม่
+        ApplyPurchasedUpgrades();
+
+        // รีเฟรช UI
         RefreshAllUpgradeButtons();
+        RefreshAllOwnText();
     }
 
     void RefreshAllUpgradeButtons()
     {
-        // ต้องมีสคริปต์ UpgradeBuyButton อยู่บนปุ่ม
         var buttons = FindObjectsOfType<Upgrade>(true);
+
         foreach (var b in buttons)
         {
-            b.RefreshUI(); // ต้องเป็น public ใน UpgradeBuyButton
+            b.RefreshUI();
+        }
+    }
+
+    void RefreshAllOwnText()
+    {
+        var owns = FindObjectsOfType<UpgradeOwnText>(true);
+
+        foreach (var o in owns)
+        {
+            o.Refresh();
         }
     }
 }

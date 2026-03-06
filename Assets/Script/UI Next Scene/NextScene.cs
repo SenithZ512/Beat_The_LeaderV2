@@ -15,4 +15,9 @@ public class NextScene : MonoBehaviour
     {
         SceneManager.LoadScene("Main");
     }
+
+    public void GotoTitle()
+    {
+        SceneManager.LoadScene("Title");
+    }
 }
