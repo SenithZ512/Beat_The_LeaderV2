@@ -26,7 +26,8 @@ public class Upgrade : MonoBehaviour
         if (buyButton != null)
             buyButton.onClick.AddListener(Buy);
 
-        PlayerPrefs.DeleteAll();
+        // ❌ ลบบรรทัดนี้ออก
+        // PlayerPrefs.DeleteAll();
 
         RefreshUI();
     }

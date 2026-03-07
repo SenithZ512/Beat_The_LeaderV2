@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MoneyManager : MonoBehaviour
 {
@@ -21,91 +22,126 @@ public class MoneyManager : MonoBehaviour
     const string KEY_MONEY = "Money";
     const string KEY_UNCLAIMED = "UnclaimedMoney";
 
-    float saveTimer = 0f;
-    const float SAVE_INTERVAL = 1f; // เซฟทุก 1 วินาทีพอ
+    const string KEY_SPEED = "SpeedMultiplier";
+    const string KEY_INCOME = "IncomePerSecond";
 
+    float saveTimer = 0f;
+    const float SAVE_INTERVAL = 1f;
 
     [Header("Speed Multiplier")]
     public float speedMultiplier = 1f;
-    private void Awake()
+
+    void Awake()
     {
-        // กัน MoneyManager ซ้ำ (สำคัญมากถ้าเปลี่ยนซีน/มี prefab ซ้ำ)
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void Start()
     {
         LoadData();
+
         UpdateUI();
         UpdateUnclaimedUI();
-        if (gainedPopupText) gainedPopupText.gameObject.SetActive(false);
+
+        if (gainedPopupText != null)
+            gainedPopupText.gameObject.SetActive(false);
     }
 
-    private void Update()
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // ✅ Passive สะสมเข้ากองรอรับ
+        // หา UI ใหม่ทุก Scene
+        moneyText = GameObject.Find("Text Coin")?.GetComponent<TextMeshProUGUI>();
+
+        var passive = GameObject.Find("Passive Money");
+        if (passive != null)
+            unclaimedText = passive.GetComponentInChildren<TextMeshProUGUI>();
+
+        UpdateUI();
+        UpdateUnclaimedUI();
+    }
+
+    void Update()
+    {
+        // Passive income
         unclaimedMoney += incomePerSecond * speedMultiplier * Time.deltaTime;
+
         UpdateUnclaimedUI();
 
-        // ✅ Autosave แบบไม่ถี่เกินไป
+        // autosave
         saveTimer += Time.deltaTime;
+
         if (saveTimer >= SAVE_INTERVAL)
         {
             saveTimer = 0f;
-            SaveUnclaimedOnly();
+            SaveData();
         }
     }
 
-    // ✅ คลิก/รางวัลต่างๆ: ให้ไปกองรอรับเหมือน passive (รวมกัน)
     public void AddMoney(int amount)
     {
         AddToUnclaimed(amount);
     }
 
-    // ถ้าอยากเพิ่มเข้ากระเป๋าทันทีจริงๆ (บางกรณีพิเศษ) ใช้อันนี้
     public void AddToWallet(int amount)
     {
         currentMoney += amount;
-        SaveMoney();
+
+        SaveData();
         UpdateUI();
     }
 
-    // ✅ เพิ่มเข้ากองรอรับ (ใช้กับ click ได้)
     public void AddToUnclaimed(int amount)
     {
         unclaimedMoney += amount;
+
         UpdateUnclaimedUI();
-        SaveUnclaimedOnly();
+        SaveData();
     }
 
-    // ✅ ใช้เงินซื้อของ (ใช้ currentMoney เท่านั้น)
     public bool SpendMoney(int amount)
     {
         if (currentMoney >= amount)
         {
             currentMoney -= amount;
-            SaveMoney();
+
+            SaveData();
             UpdateUI();
+
             return true;
         }
+
         return false;
     }
 
-    // ✅ กด ClaimAll แล้วรวม (click+passive) เข้า wallet ทีเดียว
     public void ClaimAll()
     {
         int claim = Mathf.FloorToInt(unclaimedMoney);
-        if (claim <= 0) return;
+
+        if (claim <= 0)
+            return;
 
         currentMoney += claim;
-        unclaimedMoney -= claim; // หรือ unclaimedMoney = 0f;
+        unclaimedMoney -= claim;
 
         SaveData();
+
         UpdateUI();
         UpdateUnclaimedUI();
 
@@ -114,30 +150,24 @@ public class MoneyManager : MonoBehaviour
 
     void UpdateUI()
     {
-        if (moneyText) moneyText.text = currentMoney + " $";
+        if (moneyText != null)
+            moneyText.text = currentMoney + " $";
     }
 
     void UpdateUnclaimedUI()
     {
-        if (unclaimedText) unclaimedText.text = Mathf.FloorToInt(unclaimedMoney) + " $";
-    }
-
-    void SaveMoney()
-    {
-        PlayerPrefs.SetInt(KEY_MONEY, currentMoney);
-        PlayerPrefs.Save();
-    }
-
-    void SaveUnclaimedOnly()
-    {
-        PlayerPrefs.SetFloat(KEY_UNCLAIMED, unclaimedMoney);
-        PlayerPrefs.Save();
+        if (unclaimedText != null)
+            unclaimedText.text = Mathf.FloorToInt(unclaimedMoney) + " $";
     }
 
     void SaveData()
     {
         PlayerPrefs.SetInt(KEY_MONEY, currentMoney);
         PlayerPrefs.SetFloat(KEY_UNCLAIMED, unclaimedMoney);
+
+        PlayerPrefs.SetFloat(KEY_SPEED, speedMultiplier);
+        PlayerPrefs.SetFloat(KEY_INCOME, incomePerSecond);
+
         PlayerPrefs.Save();
     }
 
@@ -145,25 +175,37 @@ public class MoneyManager : MonoBehaviour
     {
         currentMoney = PlayerPrefs.GetInt(KEY_MONEY, 0);
         unclaimedMoney = PlayerPrefs.GetFloat(KEY_UNCLAIMED, 0f);
+
+        speedMultiplier = PlayerPrefs.GetFloat(KEY_SPEED, 1f);
+        incomePerSecond = PlayerPrefs.GetFloat(KEY_INCOME, 1f);
     }
 
     public void ResetMoney()
     {
         PlayerPrefs.DeleteKey(KEY_MONEY);
         PlayerPrefs.DeleteKey(KEY_UNCLAIMED);
+        PlayerPrefs.DeleteKey(KEY_SPEED);
+        PlayerPrefs.DeleteKey(KEY_INCOME);
+
         PlayerPrefs.Save();
 
         currentMoney = 0;
         unclaimedMoney = 0f;
+        speedMultiplier = 1f;
+        incomePerSecond = 1f;
 
         UpdateUI();
         UpdateUnclaimedUI();
-        if (gainedPopupText) gainedPopupText.gameObject.SetActive(false);
+
+        if (gainedPopupText != null)
+            gainedPopupText.gameObject.SetActive(false);
     }
 
     void ShowPopup(int amount)
     {
-        if (!gainedPopupText) return;
+        if (gainedPopupText == null)
+            return;
+
         StopAllCoroutines();
         StartCoroutine(PopupRoutine(amount));
     }
@@ -171,29 +213,35 @@ public class MoneyManager : MonoBehaviour
     IEnumerator PopupRoutine(int amount)
     {
         gainedPopupText.gameObject.SetActive(true);
-        gainedPopupText.text = $"+{amount} $";
-        yield return new WaitForSeconds(1.0f);
+        gainedPopupText.text = "+" + amount + " $";
+
+        yield return new WaitForSeconds(1f);
+
         gainedPopupText.gameObject.SetActive(false);
     }
+
     public void ResetUpgradesOnly()
     {
-        // คืนค่าเริ่มต้น
         incomePerSecond = 1f;
-        speedMultiplier = 1f; // ถ้ามี
-                              // ลบคีย์อัปเกรดทั้งหมดที่เคยซื้อ
-                              // ต้องใส่ให้ตรงกับ upgradeId ที่คุณใช้จริง
-        string[] upgradeIds = { "GPU_2060", "GPU_3070", "GPU_4080", "GPU_5080Ti" };
+        speedMultiplier = 1f;
+
+        PlayerPrefs.DeleteKey(KEY_SPEED);
+        PlayerPrefs.DeleteKey(KEY_INCOME);
+
+        string[] upgradeIds =
+        {
+            "GTX_1050",
+            "GPU_2060",
+            "GPU_3070",
+            "GPU_4080",
+            "GPU_5080Ti"
+        };
 
         foreach (var id in upgradeIds)
+        {
             PlayerPrefs.DeleteKey("UPG_" + id);
+        }
 
         PlayerPrefs.Save();
-        UpdateUnclaimedUI();
-        // ถ้ามี UpgradeManager ให้รีโหลดระบบ
-        if (FindObjectOfType<UpgradeManager>())
-        {
-            FindObjectOfType<UpgradeManager>().SendMessage("LoadUpgrades", SendMessageOptions.DontRequireReceiver);
-        }
-        Debug.Log("Upgrades Reset Complete");
     }
 }

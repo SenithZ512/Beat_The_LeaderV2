@@ -9,7 +9,7 @@ public class BuyWeapon : MonoBehaviour
     public GameObject weaponPrefab;
     public int price;
 
-    public TextMeshProUGUI buttonText; // ใช้ Text เดิมของปุ่ม
+    public TextMeshProUGUI buttonText;
 
     bool purchased = false;
 
@@ -17,12 +17,11 @@ public class BuyWeapon : MonoBehaviour
     {
         if (!purchased)
         {
-            if (playerMoney.money >= price)
+            if (MoneyManager.Instance.SpendMoney(price))
             {
-                playerMoney.money -= price;
                 purchased = true;
 
-                buttonText.text = "Equip"; // เปลี่ยนข้อความ
+                buttonText.text = "Equip";
             }
         }
 

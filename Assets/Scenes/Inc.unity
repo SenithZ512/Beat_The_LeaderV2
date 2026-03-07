@@ -1061,7 +1061,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4436051916799529843, guid: 71c28f07127c66b419c0c0919cfea815, type: 3}
       propertyPath: m_Name
-      value: Upgrade#1
+      value: GTX_1050
       objectReference: {fileID: 0}
     - target: {fileID: 5781093475299501194, guid: 71c28f07127c66b419c0c0919cfea815, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1640,7 +1640,7 @@ GameObject:
   - component: {fileID: 299286260}
   - component: {fileID: 299286259}
   m_Layer: 5
-  m_Name: Upgrade#1 (3)
+  m_Name: GPU_4080
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1788,6 +1788,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2057297590}
     m_Modifications:
+    - target: {fileID: 2195735390986348525, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 29.3
+      objectReference: {fileID: 0}
     - target: {fileID: 2959845671928405256, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
       propertyPath: m_Name
       value: Coin
@@ -1812,6 +1816,18 @@ PrefabInstance:
       propertyPath: gainedPopupText
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5329682820803064830, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -43.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5329682820803064830, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7215930378002941195, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+      propertyPath: m_text
+      value: Coin
+      objectReference: {fileID: 0}
     - target: {fileID: 7215930378002941195, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
       propertyPath: m_fontColor.b
       value: 0.69411767
@@ -1827,6 +1843,10 @@ PrefabInstance:
     - target: {fileID: 7215930378002941195, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4289849343
+      objectReference: {fileID: 0}
+    - target: {fileID: 8382669766967535893, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+      propertyPath: m_text
+      value: '-'
       objectReference: {fileID: 0}
     - target: {fileID: 8382669766967535893, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
       propertyPath: m_fontColor.b
@@ -1939,8 +1959,28 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4552931406363905813, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 507218208}
   m_SourcePrefab: {fileID: 100100000, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+--- !u!1 &507218204 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4552931406363905813, guid: 3f2a0bd768836fd4eabf2acd62c8d9b5, type: 3}
+  m_PrefabInstance: {fileID: 507218203}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &507218208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507218204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fd2608375a3a0544a0631516ad855ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2045,7 +2085,7 @@ GameObject:
   - component: {fileID: 566142767}
   - component: {fileID: 566142766}
   m_Layer: 5
-  m_Name: Upgrade#1 (1)
+  m_Name: GPU_2060
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2258,7 +2298,7 @@ GameObject:
   - component: {fileID: 635698958}
   - component: {fileID: 635698957}
   m_Layer: 5
-  m_Name: Upgrade#1 (4)
+  m_Name: GPU_5080Ti
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4486,7 +4526,7 @@ GameObject:
   - component: {fileID: 1164704652}
   - component: {fileID: 1164704651}
   m_Layer: 5
-  m_Name: Upgrade#1 (2)
+  m_Name: GPU_3070
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5534,10 +5574,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   upgrades:
-  - id: 
-    price: 0
-    addIncomePerSec: 0
-    speedMultiplier: 0
+  - id: GTX_1050
+    price: 2000
+    addIncomePerSec: 2
+    speedMultiplier: 1.3
+  - id: GPU_2060
+    price: 7000
+    addIncomePerSec: 4
+    speedMultiplier: 1.7
+  - id: GPU_3070
+    price: 13000
+    addIncomePerSec: 6
+    speedMultiplier: 2.2
+  - id: GPU_4080
+    price: 22000
+    addIncomePerSec: 12
+    speedMultiplier: 2.6
+  - id: GPU_5080Ti
+    price: 46000
+    addIncomePerSec: 20
+    speedMultiplier: 4
   baseIncomePerSecond: 1
   baseSpeedMultiplier: 1
 --- !u!4 &1847330043

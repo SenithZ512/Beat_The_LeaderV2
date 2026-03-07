@@ -9,8 +9,8 @@ public class UpgradeManager : MonoBehaviour
     [System.Serializable]
     public class UpgradeDef
     {
-        public string id;              // ID ของ Upgrade
-        public int price;              // ราคา
+        public string id;              // เช่น GPU_2060 (ห้ามซ้ำ)
+        public int price;              // ราคา เช่น 7000
         public float addIncomePerSec;  // เพิ่มเงินต่อวินาที
         public float speedMultiplier;  // ตัวคูณสปีด
     }
@@ -18,7 +18,7 @@ public class UpgradeManager : MonoBehaviour
     [Header("List of Upgrades")]
     public UpgradeDef[] upgrades;
 
-    [Header("Base Values")]
+    [Header("Base Values (ตอนยังไม่อัปเกรด)")]
     public float baseIncomePerSecond = 1f;
     public float baseSpeedMultiplier = 1f;
 
@@ -31,11 +31,13 @@ public class UpgradeManager : MonoBehaviour
         }
 
         Instance = this;
+
+        // เพิ่มบรรทัดนี้เพื่อไม่ให้หายตอนเปลี่ยน Scene
+        DontDestroyOnLoad(gameObject);
     }
 
-    void Start()
+    private void Start()
     {
-        // โหลด upgrade ที่เคยซื้อ
         ApplyPurchasedUpgrades();
     }
 
@@ -56,6 +58,7 @@ public class UpgradeManager : MonoBehaviour
 
         if (IsBought(id)) return false;
 
+        // ใช้เงิน
         if (!MoneyManager.Instance.SpendMoney(def.price))
             return false;
 
@@ -63,23 +66,21 @@ public class UpgradeManager : MonoBehaviour
         PlayerPrefs.SetInt(Key(id), 1);
         PlayerPrefs.Save();
 
-        // ใช้ผล upgrade
+        // ใช้เอฟเฟกต์อัปเกรด
         ApplyOne(def);
 
         // รีเฟรช UI
         RefreshAllUpgradeButtons();
-        RefreshAllOwnText();
 
         return true;
     }
 
     public void ApplyPurchasedUpgrades()
     {
-        // reset ค่า
+        // เริ่มจากค่า base ก่อน
         MoneyManager.Instance.incomePerSecond = baseIncomePerSecond;
         MoneyManager.Instance.speedMultiplier = baseSpeedMultiplier;
 
-        // ใส่ effect ของ upgrade ที่ซื้อ
         foreach (var def in upgrades)
         {
             if (IsBought(def.id))
@@ -88,14 +89,14 @@ public class UpgradeManager : MonoBehaviour
             }
         }
 
-        // รีเฟรช UI
         RefreshAllUpgradeButtons();
-        RefreshAllOwnText();
     }
 
     void ApplyOne(UpgradeDef def)
     {
         MoneyManager.Instance.incomePerSecond += def.addIncomePerSec;
+
+        // คูณสปีด
         MoneyManager.Instance.speedMultiplier *= Mathf.Max(1f, def.speedMultiplier);
     }
 
@@ -110,7 +111,7 @@ public class UpgradeManager : MonoBehaviour
         return null;
     }
 
-    // ปุ่ม Reset Upgrade
+    // รีเซ็ตอัปเกรด
     public void ResetUpgrades()
     {
         foreach (var def in upgrades)
@@ -120,16 +121,12 @@ public class UpgradeManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
-        // รีเซ็ตค่า stat
+        // คืนค่า base
         MoneyManager.Instance.incomePerSecond = baseIncomePerSecond;
         MoneyManager.Instance.speedMultiplier = baseSpeedMultiplier;
 
-        // โหลดสถานะใหม่
-        ApplyPurchasedUpgrades();
-
-        // รีเฟรช UI
+        // รีเฟรชปุ่ม
         RefreshAllUpgradeButtons();
-        RefreshAllOwnText();
     }
 
     void RefreshAllUpgradeButtons()
@@ -139,16 +136,6 @@ public class UpgradeManager : MonoBehaviour
         foreach (var b in buttons)
         {
             b.RefreshUI();
-        }
-    }
-
-    void RefreshAllOwnText()
-    {
-        var owns = FindObjectsOfType<UpgradeOwnText>(true);
-
-        foreach (var o in owns)
-        {
-            o.Refresh();
         }
     }
 }
